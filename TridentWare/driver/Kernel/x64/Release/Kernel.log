@@ -1,0 +1,10 @@
+﻿  entry.cpp
+C:\Users\a\source\repos\TridentWare\driver\Kernel\functions.h(8,48): warning C4312: 'type cast': conversion from 'uint32_t' to 'HANDLE' of greater size
+C:\Users\a\source\repos\TridentWare\driver\Kernel\functions.h(6,33): warning C4305: 'return': truncation from 'NTSTATUS' to 'bool'
+C:\Users\a\source\repos\TridentWare\driver\Kernel\functions.h(26,47): warning C4312: 'type cast': conversion from 'uint32_t' to 'HANDLE' of greater size
+C:\Users\a\source\repos\TridentWare\driver\Kernel\functions.h(24,31): warning C4305: 'return': truncation from 'NTSTATUS' to 'bool'
+C:\Users\a\source\repos\TridentWare\driver\Kernel\functions.h(43,47): warning C4312: 'type cast': conversion from 'uint32_t' to 'HANDLE' of greater size
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(1389,5): warning MSB8012: TargetPath(C:\Users\a\source\repos\TridentWare\x64\Release\.sys) does not match the Linker's OutputFile property value (C:\Users\a\source\repos\TridentWare\x64\Release\Kernel.sys). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  Generating code
+  Finished generating code
+  Kernel.vcxproj -> C:\Users\a\source\repos\TridentWare\x64\Release\.sys

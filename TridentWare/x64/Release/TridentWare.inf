@@ -1,0 +1,90 @@
+;
+; TridentWare.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=TridentWare.cat
+DriverVer = 10/22/2023,10.32.17.136
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+TridentWare_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+TridentWare.sys  = 1,,
+;
+
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64
+
+[Standard.NTamd64]
+%TridentWare.DeviceDesc%=TridentWare_Device, Root\TridentWare ; TODO: edit hw-id
+
+[TridentWare_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+TridentWare.sys
+
+;-------------- Service installation
+[TridentWare_Device.NT.Services]
+AddService = TridentWare,%SPSVCINST_ASSOCSERVICE%, TridentWare_Service_Inst
+
+; -------------- TridentWare driver install sections
+[TridentWare_Service_Inst]
+DisplayName    = %TridentWare.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\TridentWare.sys
+
+;
+;--- TridentWare_Device Coinstaller installation ------
+;
+
+[TridentWare_Device.NT.CoInstallers]
+AddReg=TridentWare_Device_CoInstaller_AddReg
+CopyFiles=TridentWare_Device_CoInstaller_CopyFiles
+
+[TridentWare_Device_CoInstaller_AddReg]
+;
+
+
+[TridentWare_Device_CoInstaller_CopyFiles]
+;
+
+
+[TridentWare_Device.NT.Wdf]
+KmdfService =  TridentWare, TridentWare_wdfsect
+[TridentWare_wdfsect]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "TridentWare Installation Disk"
+TridentWare.DeviceDesc = "TridentWare Device"
+TridentWare.SVCDESC = "TridentWare Service"
