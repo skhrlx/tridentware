@@ -19,14 +19,18 @@ namespace Settings
     bool bConfig = true;
     namespace aimbot 
     {
-        bool aimbot = false;
-        inline float aim_fov = 50.0f;
-        inline float smooth = 10.0f;
+        bool aimbot = true;
+        bool aimbot_silent = false;
+        bool visible_check = true;
+        inline int aim_fov = 80.0f;
+        inline int smoothx = 1.0f;
+        inline int smoothy = 1.0f;
         inline float trigger_delay = 1.0f;
         bool fov_circle = false;
         bool crosshair = true;
         int crosshair_size = 2;
         bool triggerbot = true;
+        bool triggerbot_toggle = false;
         inline  int selectedhitbox = 0;
         inline  const char* hitbox[] = { ("head") ,("neck"), ("cock") };
 
@@ -45,9 +49,7 @@ namespace Settings
          bool bHealth = true;
          bool headcircle = false;
          bool bones = true;
-         bool distance = false;
          bool armor = false;
-         bool names = false;
 
          bool box = true;
          inline  int healthtype = 1;
@@ -64,9 +66,12 @@ namespace Settings
          float BoxWidth = 1.0f;
     }
     namespace misc {
+        int soundesp_fov = 150;
         bool bhop = true;
         bool save_fps = false;
         bool water = false;
+        bool soundesp = false;
+        bool soundesp_fovcircle = false;
     }
 }
 

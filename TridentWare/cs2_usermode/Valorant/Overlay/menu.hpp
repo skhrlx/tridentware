@@ -2,6 +2,7 @@
 namespace hotkeys
 {
 	int aimkey;
+	int soundespkey;
 }
 static int keystatus = 0;
 static int realkey = 0;
@@ -21,6 +22,7 @@ void ChangeKey(void* blank)
 			if (GetKeyState(i) & 0x8000)
 			{
 				hotkeys::aimkey = i;
+				hotkeys::soundespkey = i;
 				keystatus = 0;
 				return;
 			}
@@ -533,10 +535,16 @@ void drawmenu() {
 					{
 						ImGui::Checkbox("aimbot", &Settings::aimbot::aimbot);
 						if (Settings::aimbot::aimbot) {
-							ImGui::SliderFloat("fov", &Settings::aimbot::aim_fov, 1, 360);
+							ImGui::Checkbox("silent aim", &Settings::aimbot::aimbot_silent);
 							ImGui::Spacing();
 							ImGui::Spacing();
-							ImGui::SliderFloat("smooth", &Settings::aimbot::smooth, 1, 360);
+							ImGui::SliderInt("fov", &Settings::aimbot::aim_fov, 1, 125);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::SliderInt("smooth x", &Settings::aimbot::smoothx, 1, 10);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::SliderInt("smooth y", &Settings::aimbot::smoothy, 1, 10);
 							ImGui::Spacing();
 							ImGui::Text(("key "));
 							ImGui::SameLine();
@@ -544,15 +552,29 @@ void drawmenu() {
 							ImGui::Spacing();
 							ImGui::Spacing();
 							ImGui::Combo(("hitbox"), &Settings::aimbot::selectedhitbox, Settings::aimbot::hitbox, IM_ARRAYSIZE(Settings::aimbot::hitbox));
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::Checkbox("visible check", &Settings::aimbot::visible_check);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::Checkbox("fov circle", &Settings::aimbot::fov_circle);
 
 						}
 						ImGui::Spacing();
-						ImGui::Checkbox("fov circle", &Settings::aimbot::fov_circle);
 						ImGui::Checkbox("crosshair", &Settings::aimbot::crosshair);
-						ImGui::SliderInt("crosshair size", &Settings::aimbot::crosshair_size, 1 ,5);
+						if (Settings::aimbot::crosshair == true)
+						{
+							ImGui::SliderInt("crosshair size", &Settings::aimbot::crosshair_size, 1, 5);
+						}
+
 						ImGui::Checkbox("triggerbot", &Settings::aimbot::triggerbot);
-						if (Settings::aimbot::triggerbot) {
+
+						if (Settings::aimbot::triggerbot)
+						{
 							ImGui::SliderFloat("delay (ms)", &Settings::aimbot::trigger_delay, 1, 30);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::Checkbox("triggerbot toggle", &Settings::aimbot::triggerbot_toggle);
 						}
 
 						ImGui::EndChild();
@@ -579,8 +601,6 @@ void drawmenu() {
 							ImGui::Combo(("health type"), &Settings::Visuals::healthtype, Settings::Visuals::healtht, IM_ARRAYSIZE(Settings::Visuals::healtht));
 						}
 						ImGui::Checkbox("show snaplines", &Settings::Visuals::bSnaplines);
-						ImGui::Checkbox("show distance", &Settings::Visuals::distance);
-						ImGui::Checkbox("show names", &Settings::Visuals::names);
 						ImGui::EndChild();
 					}
 
@@ -598,16 +618,23 @@ void drawmenu() {
 					ImGui::BeginChild(("##tab3left"), ImVec2(189, 455), true, ImGuiWindowFlags_NoScrollbar);
 					{
 						ImGui::Checkbox("bunny hop", &Settings::misc::bhop);
-					}
+						ImGui::Spacing();
+						ImGui::Checkbox("sound esp", &Settings::misc::soundesp);
+						if (Settings::misc::soundesp == true)
+						{
+							ImGui::Spacing();
+							ImGui::SliderInt("fov", &Settings::misc::soundesp_fov, 1, 250);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::Text(("key "));
+							ImGui::SameLine();
+							HotkeyButton(hotkeys::soundespkey, ChangeKey, keystatus);
+							ImGui::Spacing();
+							ImGui::Spacing();
+							ImGui::Checkbox("fov circle", &Settings::misc::soundesp_fovcircle);
+						}
 
-					ImGui::SameLine();
-
-					ImGui::BeginChild(("##tab3right"), ImVec2(189, 455), true, ImGuiWindowFlags_NoScrollbar);
-					{
-
-						ImGui::Checkbox("save fps", &Settings::misc::save_fps);
 						ImGui::Checkbox("water mark", &Settings::misc::water);
-
 
 						ImGui::EndChild();
 					}

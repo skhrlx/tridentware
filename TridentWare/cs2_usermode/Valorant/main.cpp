@@ -71,6 +71,10 @@ int main()
 	std::string random = utils::GenerateStr(20);
 	SetConsoleTitleA(random.c_str());
 
+	std::thread TriggerBotT(triggerLoop);
+
+	std::thread SoundEspT(soundespLoop);
+
 	main_loop();
 
 	exit(0);
@@ -82,7 +86,6 @@ auto render() -> void
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	triggerLoop();
 	espLoop();
 	aimLoop();
 	drawmenu();
@@ -124,12 +127,12 @@ auto main_loop() -> WPARAM
 		}
 
 		HWND hwnd_active = GetForegroundWindow();
-		if (GetAsyncKeyState(0x23) & 1)
+		if (GetAsyncKeyState(VK_DELETE) & 1)
 			exit(8);
 
 		if (hwnd_active == GameWnd) {
 			HWND hwndtest = GetWindow(hwnd_active, GW_HWNDPREV);
-			SetWindowPos(MyWnd, hwndtest, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			SetWindowPos(MyWnd, hwndtest, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE && HWND_TOPMOST);
 		}
 		RECT rc;
 		POINT xy;

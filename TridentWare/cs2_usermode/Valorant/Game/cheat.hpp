@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <future>
 #include "../Overlay/render.hpp"
 #include "../Arduino/Arduino.hpp"
 
@@ -169,10 +170,12 @@ void espLoop()
 			DrawCross(Red);
 		}
 
-		if (Settings::aimbot::fov_circle) {
-			DWORD ScreenCenterX = GetSystemMetrics(SM_CXSCREEN);
-			DWORD ScreenCenterY = GetSystemMetrics(SM_CYSCREEN);
-			ImGui::GetForegroundDrawList()->AddCircle(ImVec2(ScreenCenterX / 2, ScreenCenterY / 2), Settings::aimbot::aim_fov, Red, 10000);
+		if (Settings::aimbot::fov_circle && Settings::aimbot::aimbot) {
+			fovShow(Settings::aimbot::aim_fov);
+		}
+
+		if (Settings::misc::soundesp_fovcircle && Settings::misc::soundesp) {
+			fovShow(Settings::misc::soundesp_fov);
 		}
 
 		for (CS2Entity CachePlayers : PlayerList)
@@ -306,9 +309,6 @@ void espLoop()
 					DrawArmor(screenpos.x + 35, screenhead.y, width, height, 2, CachePlayers.armor);
 
 				}
-				if (Settings::Visuals::distance) {
-
-				}
 				if (Settings::Visuals::bones)
 				{
 					Vector3 head = driver.readv<Vector3>(bonearray + 6 * 32);
@@ -387,8 +387,6 @@ void espLoop()
 
 void aimLoop()
 {
-	ImColor Red = { 250, 92, 255, 255 };
-	auto ESPColor = ImColor(255, 255, 255);
 
 	if (global_pawn) {
 		view_matrix_t view_matrix = driver.readv<view_matrix_t>(client + client_dll::dwViewMatrix);
@@ -424,8 +422,6 @@ void aimLoop()
 			Vector3 headHitBox;
 			Vector3 heady2 = driver.readv<Vector3>(bonearray + 6 * 32);
 
-			bool isVisible = driver.readv<bool>(CachePlayers.Actor + (C_CSPlayerPawnBase::m_entitySpottedState + EntitySpottedState_t::m_bSpottedByMask));
-
 			if (!w2s(heady2, headHitBox, view_matrix))
 				continue;
 
@@ -438,7 +434,7 @@ void aimLoop()
 			if (!w2s(aim_pos, aim, view_matrix))
 				continue;
 
-			if (screenpos.z >= 0.01f)
+			if (screenpos.z >= 0.1f)
 			{
 				Vector3 head = driver.readv<Vector3>(bonearray + 6 * 32);
 				Vector3 projectHead = head.world_to_screen(view_matrix);
@@ -446,28 +442,154 @@ void aimLoop()
 				float height = abs(screenpos.y - screenhead.y);
 				float width = height / 2.0f;
 
-				if (Settings::aimbot::aimbot) {
-					if (GetAsyncKeyState(hotkeys::aimkey) && (AimFov(aim) < Settings::aimbot::aim_fov) && isVisible) {
-						if (Settings::aimbot::selectedhitbox == 0) {
-							//mouse_event(MOUSEEVENTF_MOVE, (headHitBox.x - (ScreenCenterX)) / Settings::aimbot::smooth, (headHitBox.y - (ScreenCenterY)) / Settings::aimbot::smooth, 0, 0);
-							Arduino::MouseMove(headHitBox.x - (ScreenCenterX) / Settings::aimbot::smooth, headHitBox.x - (ScreenCenterX) / Settings::aimbot::smooth, 0);
+				int csPlayerHealth = driver.readv<int>(CachePlayers.Actor + C_BaseEntity::m_iHealth);
+
+				bool isVisible = driver.readv<bool>(CachePlayers.Actor + (C_CSPlayerPawnBase::m_entitySpottedState + EntitySpottedState_t::m_bSpottedByMask));
+
+				if (Settings::aimbot::aimbot)
+				{
+					if (GetAsyncKeyState(hotkeys::aimkey) && (AimFov(aim) < Settings::aimbot::aim_fov) && csPlayerHealth > 1 && !Settings::aimbot::aimbot_silent)
+					{
+
+						if (isVisible == true && Settings::aimbot::visible_check == true)
+						{
+							int deltaX = headHitBox.x - (ScreenCenterX);
+							int deltaY = headHitBox.y - (ScreenCenterY);
+
+							deltaX = (deltaX > 0) ? Settings::aimbot::smoothx : ((deltaX < 0) ? -(Settings::aimbot::smoothx) : 0);
+							deltaY = (deltaY > 0) ? Settings::aimbot::smoothy : ((deltaY < 0) ? -(Settings::aimbot::smoothy) : 0);
+
+							Arduino::MouseMove(deltaX, deltaY, 0);
+						}
+
+						if (Settings::aimbot::visible_check == false)
+						{
+							int deltaX = headHitBox.x - (ScreenCenterX);
+							int deltaY = headHitBox.y - (ScreenCenterY);
+
+							deltaX = (deltaX > 0) ? Settings::aimbot::smoothx : ((deltaX < 0) ? -(Settings::aimbot::smoothx) : 0);
+							deltaY = (deltaY > 0) ? Settings::aimbot::smoothy : ((deltaY < 0) ? -(Settings::aimbot::smoothy) : 0);
+
+							Arduino::MouseMove(deltaX, deltaY, 0);
+						}
+
+					}
+				}
+
+				if (Settings::aimbot::aimbot_silent)
+				{
+					if (GetAsyncKeyState(hotkeys::aimkey) && (AimFov(aim) < Settings::aimbot::aim_fov) && csPlayerHealth > 1)
+					{
+
+						if (isVisible == true && Settings::aimbot::visible_check == true)
+						{
+							int deltaX = headHitBox.x - (ScreenCenterX);
+							int deltaY = headHitBox.y - (ScreenCenterY);
+
+							Arduino::MouseMove(deltaX, deltaY, 0);
+
+							if (triggerBot() == true)
+							{
+								Arduino::SendCommand(CMD_CLEFT);
+								Arduino::MouseMove(-deltaX, -deltaY, 0);
+							}
+						}
+
+						if (Settings::aimbot::visible_check == false)
+						{
+							int deltaX = headHitBox.x - (ScreenCenterX);
+							int deltaY = headHitBox.y - (ScreenCenterY);
+
+							Arduino::MouseMove(deltaX, deltaY, 0);
+
+							if (triggerBot() == true)
+							{
+								Arduino::SendCommand(CMD_CLEFT);
+								Arduino::MouseMove(-deltaX, -deltaY, 0);
+							}
 						}
 					}
 				}
+
 			}
 		}
 	}
 }
 
-void triggerLoop()
+void soundespLoop()
 {
-	if (Settings::aimbot::triggerbot) {
-		if (GetAsyncKeyState(0x05))
+
+	while (true)
+	{
+		view_matrix_t view_matrix = driver.readv<view_matrix_t>(client + client_dll::dwViewMatrix);
+
+		// player info reading :
+		for (CS2Entity CachePlayers : PlayerList)
 		{
-			if (triggerBot() == true)
+			Vector3 origin = driver.readv<Vector3>(CachePlayers.Actor + C_BasePlayerPawn::m_vOldOrigin);
+
+			Vector3 head;
+			head.x = origin.x;
+			head.y = origin.y;
+			head.z = origin.z + 75.f;
+
+			// feet
+			Vector3 screenpos = origin.world_to_screen(view_matrix);
+
+			Vector3 screenhead = head.world_to_screen(view_matrix);
+			uint64_t gamescene = driver.readv<uint64_t>(CachePlayers.Actor + C_BaseEntity::m_pGameSceneNode);
+			uint64_t bonearray = driver.readv<uint64_t>(gamescene + CSkeletonInstance::m_modelState + CGameSceneNode::m_vecOrigin); //can be wrong
+
+			uintptr_t pCameraServicesPtr = driver.readv<uintptr_t>(global_pawn + C_BasePlayerPawn::m_pCameraServices);
+
+			Vector3 playerpos = driver.readv<Vector3>(CachePlayers.Actor + C_BasePlayerPawn::m_vOldOrigin);
+			Vector3 pos;
+
+			Vector3 head_pos = Vector3(playerpos.x, playerpos.y, playerpos.z + 63);
+			Vector3 heady;
+
+			Vector3 aim_pos = Vector3(playerpos.x, playerpos.y, playerpos.z + 45);
+			Vector3 aim;
+
+			if (!w2s(aim_pos, aim, view_matrix))
+				continue;
+
+			if (Settings::misc::soundesp)
 			{
-				Arduino::SendCommand(CMD_CLEFT);
+				if (GetAsyncKeyState(hotkeys::soundespkey) && (AimFov(aim) < Settings::misc::soundesp_fov))
+				{
+						Beep(100, 100);
+				}
 			}
 		}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		Sleep(1);
+	}
+}
+
+void triggerLoop()
+{
+	while (true)
+	{
+		if (Settings::aimbot::triggerbot)
+		{
+			if (GetAsyncKeyState(0x05) && Settings::aimbot::triggerbot_toggle == false)
+			{
+				if (triggerBot() == true)
+				{
+					Arduino::SendCommand(CMD_CLEFT);
+				}
+			}
+
+			if (Settings::aimbot::triggerbot_toggle == true)
+			{
+				if (triggerBot() == true)
+				{
+					Arduino::SendCommand(CMD_CLEFT);
+				}
+			}
+
+		}
+		Sleep(1);
 	}
 }

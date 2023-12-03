@@ -150,13 +150,15 @@ auto setup_window() -> void
 	RegisterClassExA(&wcex);
 
 	MyWnd = CreateWindowExA(NULL, ("Overlay"), ("Overlay"), WS_POPUP, Rect.left, Rect.top, Rect.right, Rect.bottom, NULL, NULL, wcex.hInstance, NULL);
-	SetWindowLong(MyWnd, GWL_EXSTYLE, WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
+	SetWindowLong(MyWnd, GWL_EXSTYLE, WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_TOPMOST);
+
 	SetLayeredWindowAttributes(MyWnd, RGB(0, 0, 0), 255, LWA_ALPHA);
 
 	MARGINS margin = { -1 };
 	DwmExtendFrameIntoClientArea(MyWnd, &margin);
 
-	ShowWindow(MyWnd, SW_SHOW);
+	ShowWindow(MyWnd, SW_SHOW || HWND_TOPMOST);
+
 	UpdateWindow(MyWnd);
 }
 
@@ -227,6 +229,14 @@ auto DrawHealthBar(Vector3 RootPosition, float Width, float Height, float Health
 
 	DrawFilledRect(HPBox_X, HPBox_Y, HPBoxWidth, HPBoxHeight, &ColorStructs::Col.green);
 	DrawRect(HPBox_X - 1, HPBox_Y - 1, HPBoxWidth + 2, HPBoxHeight + 2, &ColorStructs::Col.black, 1);
+}
+
+void fovShow(int fov)
+{
+	ImColor Red = { 250, 92, 255, 255 };
+	DWORD ScreenCenterX = GetSystemMetrics(SM_CXSCREEN);
+	DWORD ScreenCenterY = GetSystemMetrics(SM_CYSCREEN);
+	return ImGui::GetForegroundDrawList()->AddCircle(ImVec2(ScreenCenterX / 2, ScreenCenterY / 2), fov, Red, 10000);
 }
 
 void DrawRightProgressBar(int x, int y, int w, int h, int thick, int m_health)

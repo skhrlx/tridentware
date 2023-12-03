@@ -68,8 +68,6 @@ void onButtonUp(uint16_t buttonId) {
 }
 
 void onTiltPress(int8_t tiltValue) {
-  Serial.print("Tilt pressed: ");
-  Serial.println(tiltValue);
 }
 
 void onMouseMove(int8_t xMovement, int8_t yMovement, int8_t scrollValue) {
