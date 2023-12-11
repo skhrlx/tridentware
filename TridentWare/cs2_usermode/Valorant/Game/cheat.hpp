@@ -150,15 +150,6 @@ void espLoop()
 	if (global_pawn) {
 		view_matrix_t view_matrix = driver.readv<view_matrix_t>(client + client_dll::dwViewMatrix);
 
-		if (Settings::misc::bhop)
-		{
-			const auto on_ground = (driver.readv<uint8_t>(global_pawn + C_BaseEntity::m_fFlags) & 1) != 0;
-			if (GetAsyncKeyState(VK_SPACE) < 0 && on_ground)
-			{
-				Arduino::SendCommand(CMD_JUMP);
-			}
-		}
-
 		if (Settings::misc::water)
 		{
 			ImColor Red = { 250, 92, 255, 255 };
@@ -589,6 +580,22 @@ void triggerLoop()
 				}
 			}
 
+		}
+		Sleep(1);
+	}
+}
+
+void bhopLoop()
+{
+	while (true)
+	{
+		if (Settings::misc::bhop)
+		{
+			uint8_t on_ground = (driver.readv<uint8_t>(global_pawn + C_BaseEntity::m_fFlags) & 1) != 0;
+			if (GetAsyncKeyState(VK_SPACE) < 0 && on_ground)
+			{
+				Arduino::SendCommand(CMD_JUMP);
+			}
 		}
 		Sleep(1);
 	}

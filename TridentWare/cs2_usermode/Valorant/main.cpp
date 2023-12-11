@@ -75,6 +75,8 @@ int main()
 
 	std::thread SoundEspT(soundespLoop);
 
+	std::thread BhopT(bhopLoop);
+
 	main_loop();
 
 	exit(0);

@@ -1,0 +1,1 @@
+bcdedit.exe -set TESTSIGNING OFF
